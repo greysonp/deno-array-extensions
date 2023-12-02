@@ -2,8 +2,8 @@ declare global {
   interface Array<T> {
     any(predicate: (element: T) => boolean): boolean
     none(predicate: (element: T) => boolean): boolean
-    first(predicate: (element: T) => boolean): T | undefined
-    last(predicate: (element: T) => boolean): T | undefined
+    first(predicate?: (element: T) => boolean): T | undefined
+    last(predicate?: (element: T) => boolean): T | undefined
     min(): number
     minOf(transform: (element: T) => any): number
     max(): number
@@ -23,28 +23,40 @@ Array.prototype.none = function <T>(predicate: (element: T) => boolean): boolean
   return !this.any(predicate)
 }
 
-Array.prototype.first = function <T>(predicate: (element: T) => boolean): T | undefined {
-  return this.find(predicate)
+Array.prototype.first = function <T>(predicate?: (element: T) => boolean): T | undefined {
+  return predicate ? this.find(predicate) : (this.length > 0 ? this[0] : undefined)
 }
 
-Array.prototype.last = function <T>(predicate: (element: T) => boolean): T | undefined {
-  return this.findLast(predicate)
+Array.prototype.last = function <T>(predicate?: (element: T) => boolean): T | undefined {
+  return predicate ? this.findLast(predicate) : (this.length > 0 ? this[this.length - 1] : undefined)
 }
 
 Array.prototype.min = function (): number {
+  if (this.length == 0) {
+    throw new Error("Array is empty!")
+  }
   return Math.min(...this)
 }
 
 Array.prototype.minOf = function <T>(transform: (element: T) => any): number {
-  return this.map(transform).min()
+  if (this.length == 0) {
+    throw new Error("Array is empty!")
+  }
+  return this.map(transform).filter((it) => it !== undefined).min()
 }
 
 Array.prototype.max = function (): number {
+  if (this.length == 0) {
+    throw new Error("Array is empty!")
+  }
   return Math.max(...this)
 }
 
 Array.prototype.maxOf = function <T>(transform: (element: T) => any): number {
-  return this.map(transform).max()
+  if (this.length == 0) {
+    throw new Error("Array is empty!")
+  }
+  return this.map(transform).filter((it) => it !== undefined).max()
 }
 
 Array.prototype.sum = function (): number {
@@ -52,7 +64,7 @@ Array.prototype.sum = function (): number {
 }
 
 Array.prototype.sumOf = function <T>(transform: (element: T) => any): number {
-  return this.map(transform).reduce((sum, value) => sum + value, 0)
+  return this.map(transform).filter((it) => it !== undefined).reduce((sum, value) => sum + value, 0)
 }
 
 Array.prototype.distinct = function (): Array<any> {
