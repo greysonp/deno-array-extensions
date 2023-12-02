@@ -10,6 +10,8 @@ declare global {
     maxOf(transform: (element: T) => any): number
     sum(): number
     sumOf(transform: (element: T) => any): number
+    distinct(): Array<any>
+    distinctBy(transform: (element: T) => any): Array<T>
   }
 }
 
@@ -51,4 +53,24 @@ Array.prototype.sum = function (): number {
 
 Array.prototype.sumOf = function <T>(transform: (element: T) => any): number {
   return this.map(transform).reduce((sum, value) => sum + value, 0)
+}
+
+Array.prototype.distinct = function (): Array<any> {
+  return [...new Set(this)]
+}
+
+Array.prototype.distinctBy = function <T>(transform: (element: T) => any): Array<T> {
+  const distinct: Set<any> = new Set()
+  const out: Array<T> = []
+
+  for (const element of this) {
+    const transformed = transform(element)
+
+    if (!distinct.has(transformed)) {
+      distinct.add(transformed)
+      out.push(element)
+    }
+  }
+
+  return out
 }
