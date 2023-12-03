@@ -16,6 +16,7 @@ declare global {
     distinctBy(transform: (element: T) => any): Array<T>
     filterNotNull(): Array<NonNullable<T>>
     mapNotNull(transform: (element: T) => any): Array<NonNullable<any>>
+    associateBy(keySelector: (element: T) => any): Map<any, T>
   }
 }
 
@@ -58,11 +59,11 @@ Array.prototype.minBy = function <T>(transform: (element: T) => any): number {
   let transformedCandidate = transform(this[0])
 
   for (let i = 1; i < this.length; i++) {
-    const e = this[i]
-    const transformed = transform(e)
+    const element = this[i]
+    const transformed = transform(element)
 
     if (transformed < transformedCandidate) {
-      candidate = e
+      candidate = element
       transformedCandidate = transformed
     }
   }
@@ -93,11 +94,11 @@ Array.prototype.maxBy = function <T>(transform: (element: T) => any): number {
   let transformedCandidate = transform(this[0])
 
   for (let i = 1; i < this.length; i++) {
-    const e = this[i]
-    const transformed = transform(e)
+    const element = this[i]
+    const transformed = transform(element)
 
     if (transformed > transformedCandidate) {
-      candidate = e
+      candidate = element
       transformedCandidate = transformed
     }
   }
@@ -139,4 +140,14 @@ Array.prototype.filterNotNull = function <T>(): Array<NonNullable<T>> {
 
 Array.prototype.mapNotNull = function <T>(transform: (element: T) => any): Array<NonNullable<any>> {
   return this.map(transform).filterNotNull()
+}
+
+Array.prototype.associateBy = function <T>(keySelector: (element: T) => any): Map<any, T> {
+  const out: Map<any, T> = new Map()
+
+  for (const element of this) {
+    out.set(keySelector(element), element)
+  }
+
+  return out
 }

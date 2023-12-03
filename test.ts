@@ -330,3 +330,23 @@ Deno.test("mapNotNull - general", () => {
     [1, 2],
   )
 })
+
+Deno.test("associateBy - empty", () => {
+  assertEquals(
+    [].associateBy((it) => it),
+    new Map(),
+  )
+})
+
+Deno.test("associateBy - general", () => {
+  assertEquals(
+    [{ a: "a" }, { a: "b" }, { a: "c" }, { a: "b", b: 1 }, { a: null }, {}].associateBy((it) => it.a),
+    new Map([
+      ["a", { a: "a" }],
+      ["b", { a: "b", b: 1 }],
+      ["c", { a: "c" }],
+      [null, { a: null }],
+      [undefined, {}],
+    ]),
+  )
+})
