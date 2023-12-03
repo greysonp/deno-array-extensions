@@ -38,9 +38,15 @@ declare global {
 
     /**
      * Returns the element in the array that has the smallest transform result.
-     * Throws an Error if the array is empty.
+     * Throws an Error if the array is empty or the transform doesn't map to any non-null values.
      */
     minBy(transform: (element: T) => number | null | undefined): T
+
+    /**
+     * Returns the element in the array that has the smallest transform result.
+     * Returns null if the array is empty or the transform doesn't map to any non-null values.
+     */
+    minByOrNull(transform: (element: T) => number | null | undefined): T | null
 
     /**
      * Returns the minimum value in the array.
@@ -56,9 +62,15 @@ declare global {
 
     /**
      * Returns the element in the array that has the largest transform result.
-     * Throws an Error if the array is empty.
+     * Throws an Error if the array is empty or the transform doesn't map to any non-null values.
      */
     maxBy(transform: (element: T) => number | null | undefined): T
+
+    /**
+     * Returns the element in the array that has the smallest transform result.
+     * Returns null if the array is empty or the transform doesn't map to any non-null values.
+     */
+    maxByOrNull(transform: (element: T) => number | null | undefined): T | null
 
     /**
      * Finds the sum of all elements in the array.
@@ -138,17 +150,27 @@ export namespace Arrays {
   }
 
   Array.prototype.minBy = function <T>(transform: (element: T) => number | null | undefined): T {
-    if (this.length == 0) {
-      throw new Error("Array is empty!")
+    const result: T | null = this.minByOrNull(transform)
+
+    if (result == null) {
+      throw new Error("Empty or no non-null values!")
     }
 
-    let pairs: Array<Pair<T, number>> = this.mapNotNull((element) => {
+    return result
+  }
+
+  Array.prototype.minByOrNull = function <T>(transform: (element: T) => number | null | undefined): T | null {
+    if (this.length == 0) {
+      return null
+    }
+
+    const pairs: Array<Pair<T, number>> = this.mapNotNull((element) => {
       const transformed = transform(element)
       return transformed != null ? { first: element, second: transformed } : null
     })
 
     if (pairs.length == 0) {
-      throw new Error("No non-null values!")
+      return null
     }
 
     let candidate: Pair<T, number> = pairs[0]
@@ -177,17 +199,27 @@ export namespace Arrays {
   }
 
   Array.prototype.maxBy = function <T>(transform: (element: T) => number | null | undefined): T {
-    if (this.length == 0) {
-      throw new Error("Array is empty!")
+    const result: T | null = this.maxByOrNull(transform)
+
+    if (result == null) {
+      throw new Error("Empty or no non-null values!")
     }
 
-    let pairs: Array<Pair<T, number>> = this.mapNotNull((element) => {
+    return result
+  }
+
+  Array.prototype.maxByOrNull = function <T>(transform: (element: T) => number | null | undefined): T | null {
+    if (this.length == 0) {
+      return null
+    }
+
+    const pairs: Array<Pair<T, number>> = this.mapNotNull((element) => {
       const transformed = transform(element)
       return transformed != null ? { first: element, second: transformed } : null
     })
 
     if (pairs.length == 0) {
-      throw new Error("No non-null values!")
+      return null
     }
 
     let candidate: Pair<T, number> = pairs[0]

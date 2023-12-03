@@ -176,6 +176,27 @@ Deno.test("minBy - general", () => {
   )
 })
 
+Deno.test("minByOrNull - empty ", () => {
+  assertEquals(
+    [].minByOrNull((it) => it),
+    null,
+  )
+})
+
+Deno.test("minByOrNull - general", () => {
+  assertEquals(
+    [{ b: 5 }, { a: -4 }, { b: -3 }, { a: 1 }, { a: 2 }].minByOrNull((it) => it.a),
+    { a: -4 },
+  )
+})
+
+Deno.test("minByOrNull - general, all undefined", () => {
+  assertEquals(
+    [{ b: 5 }, { b: -4 }, { b: -3 }, { b: 1 }, { a: undefined }].minByOrNull((it) => it.a),
+    null,
+  )
+})
+
 Deno.test("max - empty", () => {
   assertThrows(
     () => [].max(),
@@ -215,6 +236,27 @@ Deno.test("maxBy - general", () => {
   assertEquals(
     [{ b: 5 }, { a: -4 }, { b: -3 }, { a: 1 }, { a: 2 }].maxBy((it) => it.a),
     { a: 2 },
+  )
+})
+
+Deno.test("maxByOrNull - empty ", () => {
+  assertEquals(
+    [].maxByOrNull((it) => it),
+    null,
+  )
+})
+
+Deno.test("maxByOrNull - general", () => {
+  assertEquals(
+    [{ b: 5 }, { a: -4 }, { b: -3 }, { a: 1 }, { a: 2 }].maxByOrNull((it) => it.a),
+    { a: 2 },
+  )
+})
+
+Deno.test("maxByOrNull - general, all undefined", () => {
+  assertEquals(
+    [{ b: 5 }, { b: -4 }, { b: -3 }, { b: 1 }, { a: undefined }].maxByOrNull((it) => it.a),
+    null,
   )
 })
 
