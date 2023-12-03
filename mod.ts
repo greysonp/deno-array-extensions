@@ -6,8 +6,10 @@ declare global {
     last(predicate?: (element: T) => boolean): T | undefined
     min(): number
     minOf(transform: (element: T) => any): number
+    minBy(transform: (element: T) => any): T
     max(): number
     maxOf(transform: (element: T) => any): number
+    maxBy(transform: (element: T) => any): T
     sum(): number
     sumOf(transform: (element: T) => any): number
     distinct(): Array<any>
@@ -45,6 +47,27 @@ Array.prototype.minOf = function <T>(transform: (element: T) => any): number {
   return this.map(transform).filter((it) => it !== undefined).min()
 }
 
+Array.prototype.minBy = function <T>(transform: (element: T) => any): number {
+  if (this.length == 0) {
+    throw new Error("Array is empty!")
+  }
+
+  let candidate = this[0]
+  let transformedCandidate = transform(this[0])
+
+  for (let i = 1; i < this.length; i++) {
+    const e = this[i]
+    const transformed = transform(e)
+
+    if (transformed < transformedCandidate) {
+      candidate = e
+      transformedCandidate = transformed
+    }
+  }
+
+  return candidate
+}
+
 Array.prototype.max = function (): number {
   if (this.length == 0) {
     throw new Error("Array is empty!")
@@ -57,6 +80,27 @@ Array.prototype.maxOf = function <T>(transform: (element: T) => any): number {
     throw new Error("Array is empty!")
   }
   return this.map(transform).filter((it) => it !== undefined).max()
+}
+
+Array.prototype.maxBy = function <T>(transform: (element: T) => any): number {
+  if (this.length == 0) {
+    throw new Error("Array is empty!")
+  }
+
+  let candidate = this[0]
+  let transformedCandidate = transform(this[0])
+
+  for (let i = 1; i < this.length; i++) {
+    const e = this[i]
+    const transformed = transform(e)
+
+    if (transformed > transformedCandidate) {
+      candidate = e
+      transformedCandidate = transformed
+    }
+  }
+
+  return candidate
 }
 
 Array.prototype.sum = function (): number {

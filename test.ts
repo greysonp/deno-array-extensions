@@ -157,15 +157,22 @@ Deno.test("minOf - empty", () => {
 
 Deno.test("minOf - general", () => {
   assertEquals(
-    [{ a: 5 }, { a: -4 }, { a: -3 }, { a: 1 }, { a: 2 }].minOf((it) => it.a),
+    [{ a: 5 }, { a: -4 }, { b: -3 }, { a: 1 }, { a: 2 }].minOf((it) => it.a),
     -4,
   )
 })
 
-Deno.test("minOf - not all have field", () => {
+Deno.test("minBy - empty", () => {
+  assertThrows(
+    () => [].minBy((it) => it),
+    Error,
+  )
+})
+
+Deno.test("minBy - general", () => {
   assertEquals(
-    [{ a: 5 }, { a: -4 }, { b: -3 }, { a: 1 }, { a: 2 }].minOf((it) => it.a),
-    -4,
+    [{ a: 5 }, { a: -4 }, { b: -3 }, { a: 1 }, { a: 2 }].minBy((it) => it.a),
+    { a: -4 },
   )
 })
 
@@ -192,15 +199,15 @@ Deno.test("maxOf - empty", () => {
 
 Deno.test("maxOf - general", () => {
   assertEquals(
-    [{ a: 3 }, { a: -4 }, { a: 5 }, { a: 1 }, { a: 2 }].maxOf((it) => it.a),
+    [{ a: 3 }, { a: -4 }, { a: 5 }, { b: 1 }, { a: 2 }].maxOf((it) => it.a),
     5,
   )
 })
 
-Deno.test("maxOf - not all have field", () => {
-  assertEquals(
-    [{ a: 3 }, { a: -4 }, { a: 5 }, { b: 1 }, { a: 2 }].maxOf((it) => it.a),
-    5,
+Deno.test("maxBy - empty", () => {
+  assertThrows(
+    () => [].maxBy((it) => it),
+    Error,
   )
 })
 
@@ -226,13 +233,6 @@ Deno.test("sumOf - empty", () => {
 })
 
 Deno.test("sumOf - general", () => {
-  assertEquals(
-    [{ a: 1 }, { a: 2 }, { a: 3 }, { a: -1 }].sumOf((it) => it.a),
-    5,
-  )
-})
-
-Deno.test("sumOf - general, not all have field", () => {
   assertEquals(
     [{ a: 1 }, { b: 2 }, { a: 3 }, { a: -1 }].sumOf((it) => it.a),
     3,
