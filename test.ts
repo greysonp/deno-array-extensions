@@ -312,3 +312,21 @@ Deno.test("filterNotNull - general", () => {
     ["a", "b"],
   )
 })
+
+Deno.test("mapNotNull - empty", () => {
+  assertEquals(
+    [].mapNotNull((it) => it),
+    [],
+  )
+})
+
+Deno.test("mapNotNull - general", () => {
+  // Defining variables here to show typescript knows things aren't null
+  const nullable: Array<any | null> = [{ a: 1 }, { a: null }, { a: undefined }, { a: 2 }]
+  const nonnull: Array<number> = nullable.mapNotNull((it) => it.a)
+
+  assertEquals(
+    nonnull,
+    [1, 2],
+  )
+})

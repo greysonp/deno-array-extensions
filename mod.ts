@@ -15,6 +15,7 @@ declare global {
     distinct(): Array<any>
     distinctBy(transform: (element: T) => any): Array<T>
     filterNotNull(): Array<NonNullable<T>>
+    mapNotNull(transform: (element: T) => any): Array<NonNullable<any>>
   }
 }
 
@@ -133,9 +134,9 @@ Array.prototype.distinctBy = function <T>(transform: (element: T) => any): Array
 }
 
 Array.prototype.filterNotNull = function <T>(): Array<NonNullable<T>> {
-  return this.filter(<T>(x: T | null): x is T => x !== null)
+  return this.filter((it) => it != null)
 }
 
-function nonNull<T>(val: T | null): val is T {
-  return val !== null
+Array.prototype.mapNotNull = function <T>(transform: (element: T) => any): Array<NonNullable<any>> {
+  return this.map(transform).filterNotNull()
 }
