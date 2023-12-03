@@ -1,5 +1,3 @@
-// deno-lint-ignore-file no-namespace
-
 declare global {
   interface Array<T> {
     /**
@@ -115,173 +113,168 @@ declare global {
   }
 }
 
-/**
- * Adds various extensions to the Array prototype to improve productivity.
- */
-export namespace Arrays {
-  Array.prototype.any = function <T>(predicate: (element: T) => boolean): boolean {
-    return this.find(predicate) != null
+Array.prototype.any = function <T>(predicate: (element: T) => boolean): boolean {
+  return this.find(predicate) != null
+}
+
+Array.prototype.none = function <T>(predicate: (element: T) => boolean): boolean {
+  return !this.any(predicate)
+}
+
+Array.prototype.first = function <T>(predicate?: (element: T) => boolean): T | undefined {
+  return predicate ? this.find(predicate) : (this.length > 0 ? this[0] : undefined)
+}
+
+Array.prototype.last = function <T>(predicate?: (element: T) => boolean): T | undefined {
+  return predicate ? this.findLast(predicate) : (this.length > 0 ? this[this.length - 1] : undefined)
+}
+
+Array.prototype.min = function (): number {
+  if (this.length == 0) {
+    throw new Error("Array is empty!")
+  }
+  return Math.min(...this.filterNotNull())
+}
+
+Array.prototype.minOf = function <T>(transform: (element: T) => number | null | undefined): number {
+  if (this.length == 0) {
+    throw new Error("Array is empty!")
+  }
+  return this.map(transform).filterNotNull().min()
+}
+
+Array.prototype.minBy = function <T>(transform: (element: T) => number | null | undefined): T {
+  const result: T | null = this.minByOrNull(transform)
+
+  if (result == null) {
+    throw new Error("Empty or no non-null values!")
   }
 
-  Array.prototype.none = function <T>(predicate: (element: T) => boolean): boolean {
-    return !this.any(predicate)
+  return result
+}
+
+Array.prototype.minByOrNull = function <T>(transform: (element: T) => number | null | undefined): T | null {
+  if (this.length == 0) {
+    return null
   }
 
-  Array.prototype.first = function <T>(predicate?: (element: T) => boolean): T | undefined {
-    return predicate ? this.find(predicate) : (this.length > 0 ? this[0] : undefined)
+  const pairs: Array<Pair<T, number>> = this.mapNotNull((element) => {
+    const transformed = transform(element)
+    return transformed != null ? { first: element, second: transformed } : null
+  })
+
+  if (pairs.length == 0) {
+    return null
   }
 
-  Array.prototype.last = function <T>(predicate?: (element: T) => boolean): T | undefined {
-    return predicate ? this.findLast(predicate) : (this.length > 0 ? this[this.length - 1] : undefined)
-  }
+  let candidate: Pair<T, number> = pairs[0]
 
-  Array.prototype.min = function (): number {
-    if (this.length == 0) {
-      throw new Error("Array is empty!")
+  for (let i = 1; i < pairs.length; i++) {
+    if (pairs[i].second < candidate.second) {
+      candidate = pairs[i]
     }
-    return Math.min(...this.filterNotNull())
   }
 
-  Array.prototype.minOf = function <T>(transform: (element: T) => number | null | undefined): number {
-    if (this.length == 0) {
-      throw new Error("Array is empty!")
+  return candidate.first
+}
+
+Array.prototype.max = function (): number {
+  if (this.length == 0) {
+    throw new Error("Array is empty!")
+  }
+  return Math.max(...this.filterNotNull())
+}
+
+Array.prototype.maxOf = function <T>(transform: (element: T) => number | null | undefined): number {
+  if (this.length == 0) {
+    throw new Error("Array is empty!")
+  }
+  return this.map(transform).filterNotNull().max()
+}
+
+Array.prototype.maxBy = function <T>(transform: (element: T) => number | null | undefined): T {
+  const result: T | null = this.maxByOrNull(transform)
+
+  if (result == null) {
+    throw new Error("Empty or no non-null values!")
+  }
+
+  return result
+}
+
+Array.prototype.maxByOrNull = function <T>(transform: (element: T) => number | null | undefined): T | null {
+  if (this.length == 0) {
+    return null
+  }
+
+  const pairs: Array<Pair<T, number>> = this.mapNotNull((element) => {
+    const transformed = transform(element)
+    return transformed != null ? { first: element, second: transformed } : null
+  })
+
+  if (pairs.length == 0) {
+    return null
+  }
+
+  let candidate: Pair<T, number> = pairs[0]
+
+  for (let i = 1; i < pairs.length; i++) {
+    if (pairs[i].second > candidate.second) {
+      candidate = pairs[i]
     }
-    return this.map(transform).filterNotNull().min()
   }
 
-  Array.prototype.minBy = function <T>(transform: (element: T) => number | null | undefined): T {
-    const result: T | null = this.minByOrNull(transform)
+  return candidate.first
+}
 
-    if (result == null) {
-      throw new Error("Empty or no non-null values!")
+Array.prototype.sum = function (): number {
+  return this.reduce((sum, value) => sum + value, 0)
+}
+
+Array.prototype.sumOf = function <T>(transform: (element: T) => number | null | undefined): number {
+  return this.map(transform).filterNotNull().reduce((sum, value) => sum + value, 0)
+}
+
+Array.prototype.distinct = function (): Array<any> {
+  return [...new Set(this)]
+}
+
+Array.prototype.distinctBy = function <T>(transform: (element: T) => any): Array<T> {
+  const distinct: Set<any> = new Set()
+  const out: Array<T> = []
+
+  for (const element of this) {
+    const transformed = transform(element)
+
+    if (!distinct.has(transformed)) {
+      distinct.add(transformed)
+      out.push(element)
     }
-
-    return result
   }
 
-  Array.prototype.minByOrNull = function <T>(transform: (element: T) => number | null | undefined): T | null {
-    if (this.length == 0) {
-      return null
-    }
+  return out
+}
 
-    const pairs: Array<Pair<T, number>> = this.mapNotNull((element) => {
-      const transformed = transform(element)
-      return transformed != null ? { first: element, second: transformed } : null
-    })
+Array.prototype.filterNotNull = function <T>(): Array<NonNullable<T>> {
+  return this.filter((it) => it != null)
+}
 
-    if (pairs.length == 0) {
-      return null
-    }
+Array.prototype.mapNotNull = function <T>(transform: (element: T) => any): Array<NonNullable<any>> {
+  return this.map(transform).filterNotNull()
+}
 
-    let candidate: Pair<T, number> = pairs[0]
+Array.prototype.associateBy = function <T>(keySelector: (element: T) => any): Map<any, T> {
+  const out: Map<any, T> = new Map()
 
-    for (let i = 1; i < pairs.length; i++) {
-      if (pairs[i].second < candidate.second) {
-        candidate = pairs[i]
-      }
-    }
-
-    return candidate.first
+  for (const element of this) {
+    out.set(keySelector(element), element)
   }
 
-  Array.prototype.max = function (): number {
-    if (this.length == 0) {
-      throw new Error("Array is empty!")
-    }
-    return Math.max(...this.filterNotNull())
-  }
+  return out
+}
 
-  Array.prototype.maxOf = function <T>(transform: (element: T) => number | null | undefined): number {
-    if (this.length == 0) {
-      throw new Error("Array is empty!")
-    }
-    return this.map(transform).filterNotNull().max()
-  }
-
-  Array.prototype.maxBy = function <T>(transform: (element: T) => number | null | undefined): T {
-    const result: T | null = this.maxByOrNull(transform)
-
-    if (result == null) {
-      throw new Error("Empty or no non-null values!")
-    }
-
-    return result
-  }
-
-  Array.prototype.maxByOrNull = function <T>(transform: (element: T) => number | null | undefined): T | null {
-    if (this.length == 0) {
-      return null
-    }
-
-    const pairs: Array<Pair<T, number>> = this.mapNotNull((element) => {
-      const transformed = transform(element)
-      return transformed != null ? { first: element, second: transformed } : null
-    })
-
-    if (pairs.length == 0) {
-      return null
-    }
-
-    let candidate: Pair<T, number> = pairs[0]
-
-    for (let i = 1; i < pairs.length; i++) {
-      if (pairs[i].second > candidate.second) {
-        candidate = pairs[i]
-      }
-    }
-
-    return candidate.first
-  }
-
-  Array.prototype.sum = function (): number {
-    return this.reduce((sum, value) => sum + value, 0)
-  }
-
-  Array.prototype.sumOf = function <T>(transform: (element: T) => number | null | undefined): number {
-    return this.map(transform).filterNotNull().reduce((sum, value) => sum + value, 0)
-  }
-
-  Array.prototype.distinct = function (): Array<any> {
-    return [...new Set(this)]
-  }
-
-  Array.prototype.distinctBy = function <T>(transform: (element: T) => any): Array<T> {
-    const distinct: Set<any> = new Set()
-    const out: Array<T> = []
-
-    for (const element of this) {
-      const transformed = transform(element)
-
-      if (!distinct.has(transformed)) {
-        distinct.add(transformed)
-        out.push(element)
-      }
-    }
-
-    return out
-  }
-
-  Array.prototype.filterNotNull = function <T>(): Array<NonNullable<T>> {
-    return this.filter((it) => it != null)
-  }
-
-  Array.prototype.mapNotNull = function <T>(transform: (element: T) => any): Array<NonNullable<any>> {
-    return this.map(transform).filterNotNull()
-  }
-
-  Array.prototype.associateBy = function <T>(keySelector: (element: T) => any): Map<any, T> {
-    const out: Map<any, T> = new Map()
-
-    for (const element of this) {
-      out.set(keySelector(element), element)
-    }
-
-    return out
-  }
-
-  Array.prototype.toSet = function <T>(): Set<T> {
-    return new Set(this)
-  }
+Array.prototype.toSet = function <T>(): Set<T> {
+  return new Set(this)
 }
 
 type Pair<A, B> = {
