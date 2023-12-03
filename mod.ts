@@ -17,6 +17,7 @@ declare global {
     filterNotNull(): Array<NonNullable<T>>
     mapNotNull(transform: (element: T) => any): Array<NonNullable<any>>
     associateBy(keySelector: (element: T) => any): Map<any, T>
+    toSet(): Set<T>
   }
 }
 
@@ -150,4 +151,8 @@ Array.prototype.associateBy = function <T>(keySelector: (element: T) => any): Ma
   }
 
   return out
+}
+
+Array.prototype.toSet = function <T>(): Set<T> {
+  return new Set(this)
 }

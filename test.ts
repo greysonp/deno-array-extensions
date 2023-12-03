@@ -350,3 +350,17 @@ Deno.test("associateBy - general", () => {
     ]),
   )
 })
+
+Deno.test("toSet - empty", () => {
+  assertEquals(
+    [].toSet(),
+    new Set(),
+  )
+})
+
+Deno.test("toSet - general", () => {
+  assertEquals(
+    ["a", "a", "b", "c", "c", "c"].toSet(),
+    new Set(["a", "b", "c"]),
+  )
+})
