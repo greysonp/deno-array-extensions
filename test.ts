@@ -294,3 +294,21 @@ Deno.test("distinctBy - duplicates, takes first of each", () => {
     [{ a: 1, b: 1 }, { a: 2 }, { a: 3, b: 1 }],
   )
 })
+
+Deno.test("filterNotNull - empty", () => {
+  assertEquals(
+    [].filterNotNull(),
+    [],
+  )
+})
+
+Deno.test("filterNotNull - general", () => {
+  // Defining variables here to show typescript knows things aren't null
+  const nullable: Array<string | null> = ["a", null, "b"]
+  const nonnull: Array<string> = nullable.filterNotNull()
+
+  assertEquals(
+    nonnull,
+    ["a", "b"],
+  )
+})

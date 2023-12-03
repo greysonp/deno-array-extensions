@@ -14,6 +14,7 @@ declare global {
     sumOf(transform: (element: T) => any): number
     distinct(): Array<any>
     distinctBy(transform: (element: T) => any): Array<T>
+    filterNotNull(): Array<NonNullable<T>>
   }
 }
 
@@ -129,4 +130,12 @@ Array.prototype.distinctBy = function <T>(transform: (element: T) => any): Array
   }
 
   return out
+}
+
+Array.prototype.filterNotNull = function <T>(): Array<NonNullable<T>> {
+  return this.filter(<T>(x: T | null): x is T => x !== null)
+}
+
+function nonNull<T>(val: T | null): val is T {
+  return val !== null
 }
