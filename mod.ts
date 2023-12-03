@@ -34,13 +34,13 @@ declare global {
      * Performs the transform on each element in the array and returns the minimum value of the results.
      * Throws an Error if the array is empty.
      */
-    minOf(transform: (element: T) => any): number
+    minOf(transform: (element: T) => number | null | undefined): number
 
     /**
      * Returns the element in the array that has the smallest transform result.
      * Throws an Error if the array is empty.
      */
-    minBy(transform: (element: T) => any): T
+    minBy(transform: (element: T) => number | null | undefined): T
 
     /**
      * Returns the minimum value in the array.
@@ -52,13 +52,13 @@ declare global {
      * Performs the transform on each element in the array and returns the maximum value of the results.
      * Throws an Error if the array is empty.
      */
-    maxOf(transform: (element: T) => any): number
+    maxOf(transform: (element: T) => number | null | undefined): number
 
     /**
      * Returns the element in the array that has the largest transform result.
      * Throws an Error if the array is empty.
      */
-    maxBy(transform: (element: T) => any): T
+    maxBy(transform: (element: T) => number | null | undefined): T
 
     /**
      * Finds the sum of all elements in the array.
@@ -68,7 +68,7 @@ declare global {
     /**
      * Transforms each element of the array and then finds the sum of the results.
      */
-    sumOf(transform: (element: T) => any): number
+    sumOf(transform: (element: T) => number | null | undefined): number
 
     /**
      * Removes any duplicates from the array.
@@ -127,78 +127,86 @@ export namespace Arrays {
     if (this.length == 0) {
       throw new Error("Array is empty!")
     }
-    return Math.min(...this)
+    return Math.min(...this.filterNotNull())
   }
 
-  Array.prototype.minOf = function <T>(transform: (element: T) => any): number {
+  Array.prototype.minOf = function <T>(transform: (element: T) => number | null | undefined): number {
     if (this.length == 0) {
       throw new Error("Array is empty!")
     }
-    return this.map(transform).filter((it) => it !== undefined).min()
+    return this.map(transform).filterNotNull().min()
   }
 
-  Array.prototype.minBy = function <T>(transform: (element: T) => any): number {
+  Array.prototype.minBy = function <T>(transform: (element: T) => number | null | undefined): T {
     if (this.length == 0) {
       throw new Error("Array is empty!")
     }
 
-    let candidate = this[0]
-    let transformedCandidate = transform(this[0])
-
-    for (let i = 1; i < this.length; i++) {
-      const element = this[i]
+    let pairs: Array<Pair<T, number>> = this.mapNotNull((element) => {
       const transformed = transform(element)
+      return transformed != null ? { first: element, second: transformed } : null
+    })
 
-      if (transformed < transformedCandidate) {
-        candidate = element
-        transformedCandidate = transformed
+    if (pairs.length == 0) {
+      throw new Error("No non-null values!")
+    }
+
+    let candidate: Pair<T, number> = pairs[0]
+
+    for (let i = 1; i < pairs.length; i++) {
+      if (pairs[i].second < candidate.second) {
+        candidate = pairs[i]
       }
     }
 
-    return candidate
+    return candidate.first
   }
 
   Array.prototype.max = function (): number {
     if (this.length == 0) {
       throw new Error("Array is empty!")
     }
-    return Math.max(...this)
+    return Math.max(...this.filterNotNull())
   }
 
-  Array.prototype.maxOf = function <T>(transform: (element: T) => any): number {
+  Array.prototype.maxOf = function <T>(transform: (element: T) => number | null | undefined): number {
     if (this.length == 0) {
       throw new Error("Array is empty!")
     }
-    return this.map(transform).filter((it) => it !== undefined).max()
+    return this.map(transform).filterNotNull().max()
   }
 
-  Array.prototype.maxBy = function <T>(transform: (element: T) => any): number {
+  Array.prototype.maxBy = function <T>(transform: (element: T) => number | null | undefined): T {
     if (this.length == 0) {
       throw new Error("Array is empty!")
     }
 
-    let candidate = this[0]
-    let transformedCandidate = transform(this[0])
-
-    for (let i = 1; i < this.length; i++) {
-      const element = this[i]
+    let pairs: Array<Pair<T, number>> = this.mapNotNull((element) => {
       const transformed = transform(element)
+      return transformed != null ? { first: element, second: transformed } : null
+    })
 
-      if (transformed > transformedCandidate) {
-        candidate = element
-        transformedCandidate = transformed
+    if (pairs.length == 0) {
+      throw new Error("No non-null values!")
+    }
+
+    let candidate: Pair<T, number> = pairs[0]
+
+    for (let i = 1; i < pairs.length; i++) {
+      if (pairs[i].second > candidate.second) {
+        candidate = pairs[i]
       }
     }
 
-    return candidate
+    return candidate.first
   }
 
   Array.prototype.sum = function (): number {
     return this.reduce((sum, value) => sum + value, 0)
   }
 
-  Array.prototype.sumOf = function <T>(transform: (element: T) => any): number {
-    return this.map(transform).filter((it) => it !== undefined).reduce((sum, value) => sum + value, 0)
+  Array.prototype.sumOf = function <T>(transform: (element: T) => number | null | undefined): number {
+    return this.map(transform).filterNotNull().reduce((sum, value) => sum + value, 0)
   }
 
   Array.prototype.distinct = function (): Array<any> {
@@ -242,4 +250,9 @@ export namespace Arrays {
   Array.prototype.toSet = function <T>(): Set<T> {
     return new Set(this)
   }
+}
+
+type Pair<A, B> = {
+  first: A
+  second: B
 }

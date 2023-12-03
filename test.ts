@@ -171,7 +171,7 @@ Deno.test("minBy - empty", () => {
 
 Deno.test("minBy - general", () => {
   assertEquals(
-    [{ a: 5 }, { a: -4 }, { b: -3 }, { a: 1 }, { a: 2 }].minBy((it) => it.a),
+    [{ b: 5 }, { a: -4 }, { b: -3 }, { a: 1 }, { a: 2 }].minBy((it) => it.a),
     { a: -4 },
   )
 })
@@ -208,6 +208,13 @@ Deno.test("maxBy - empty", () => {
   assertThrows(
     () => [].maxBy((it) => it),
     Error,
+  )
+})
+
+Deno.test("maxBy - general", () => {
+  assertEquals(
+    [{ b: 5 }, { a: -4 }, { b: -3 }, { a: 1 }, { a: 2 }].maxBy((it) => it.a),
+    { a: 2 },
   )
 })
 
